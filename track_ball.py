@@ -4,6 +4,10 @@ import numpy as np
 import pyk4a
 from pyk4a import Config, PyK4A, Calibration
 import time
+
+import brute_force
+import motor_controller
+
 try:
     from wb_val import *
     auto_wb = int(auto_wb)
@@ -25,6 +29,18 @@ def is_flying(pos):
     a = np.polyfit(pos[:,0], -pos[:,2], 2)[0]*10**9
     #print(pos.shape[0])
     return a < -4.35 and a > -5.45
+
+def calculate_angle(pos):
+    t = pos[:, 0]/(10**6)
+    t = t - t[0]
+    x = pos[:, 1]/1000
+    y = pos[:, 2]/1000
+    z = pos[:, 3]/1000
+    x_coeff = np.polyfit(t[:limit], x[:limit], 1)
+    y_coeff = np.polyfit(t[:limit], -y[:limit], 2)
+    z_coeff = np.polyfit(t[:limit], z[:limit], 1)
+    return brute_force.brute_force(x_coeff,y_coeff,z_coeff)
+
 
 def main():
     # Define which camera modes to use (color res and depth FOV)
@@ -49,7 +65,10 @@ def main():
 
     # Define the calibration object to allow coordinate transformations
     cal = Calibration.from_raw(k4a.calibration_raw, depth_cam_mode, color_res)
-	
+    
+    # Open Serial Connection to system
+    serial_con = motor_controller.connect()
+    
     # Declare large arrays in an attempt to manage memory allocation
     hsv = np.zeros((1080,1920,3))
     mask = np.zeros((1080,1920))
@@ -95,6 +114,11 @@ def main():
                     in_flight = is_flying(data_points[-min_points:])
                     if in_flight:
                         data_points = data_points[-min_points:]
+                        solution = calculate_angle(data_points[-min_points:])
+                        if solution is not None:
+                            steps = calc_motor_angles(solution) # This may change to a simple array call
+                            motor_controller.move(serial_con, *steps)
+                            break
                 elif in_flight:
                     in_flight = is_flying(data_points)
                     if not in_flight and len(data_points) > 9: break
@@ -120,10 +144,14 @@ def main():
                 cv2.destroyAllWindows()
                 break
             
+            # Sleep system and return home
+            time.sleep(3)
+            motor_controller.returnhome(serial_con)
             
-    np.savetxt('output.csv', np.array(data_points[:-1]), delimiter=",")
+    #np.savetxt('output.csv', np.array(data_points[:-1]), delimiter=",")
     #np.savetxt('all_output.csv', np.array(all_data_points[:-1]), delimiter=",")
     k4a.stop()
+    serial_con.close()
 
 
 if __name__ == "__main__":
