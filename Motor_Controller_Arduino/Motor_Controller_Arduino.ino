@@ -6,7 +6,7 @@ AccelStepper motor2(AccelStepper::DRIVER, 6, 7, 8);
 AccelStepper motor3(AccelStepper::DRIVER, 9, 10, 11);
 
 // Setting Motor Homing
-const int home_delay = 2000; //ms
+const int home_delay = 1000; //ms
 // Setting the Stepper Motors Speed and Acceleration
 ///////////// MOTOR ONE ///////////////
 const int mtr1_maxspeed = 2000;
@@ -84,7 +84,7 @@ void ReturnHome() {
   motor2.setAcceleration(mtr2_acceleration);
   motor3.setMaxSpeed(mtr3_maxspeed);
   motor3.setAcceleration(mtr3_acceleration);
-  delay(1000);
+  delay(home_delay);
 }
 
 //Connecting to Python and Calling Functions
