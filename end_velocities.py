@@ -15,7 +15,7 @@ import numpy as np
 # Only the function should be copied into the master script.
 ##############################################################################################
 # import camera data
-csv_data = np.loadtxt('arc5.csv', delimiter=',')
+csv_data = np.loadtxt('arc1.csv', delimiter=',')
 t = csv_data[:, 0]/(10**6)
 t = t - t[0]
 x = csv_data[:, 1]/1000
@@ -38,12 +38,12 @@ z_coeff = np.polyfit(t[:limit], z[:limit], 1)
 def end_velocities(x_coeff, y_coeff, z_coeff):
     # find time hitting backboard
     time_hitting_backboard = np.roots(z_coeff)[0] - t[0]
-    print('time hitting ', time_hitting_backboard)
+    #print('time hitting ', time_hitting_backboard)
     
     # differentiate each position function w.r.t. time to find velocities
     x_vel = np.polyder(x_coeff)[0]
-    print('x coeff ', x_coeff)
-    print('x vel ', x_vel)
+    #print('x coeff ', x_coeff)
+    #print('x vel ', x_vel)
     y_vel = np.polyder(y_coeff)
     z_vel = np.polyder(z_coeff)[0]
     
@@ -56,14 +56,14 @@ def end_velocities(x_coeff, y_coeff, z_coeff):
     
     return ball_vel
     
-print(end_velocities(x_coeff, y_coeff, z_coeff))
+#print(end_velocities(x_coeff, y_coeff, z_coeff))
     
     
     
 # function that will calculate 3D velocity of ball at a desired z location
 def mid_velocities(z_loc, x_coeff, y_coeff, z_coeff):
     # get time when ball is at z = desired location
-    time_at_z = z_loc + (z_coeff[0] * t[0]) - z_coeff[1]
+    time_at_z = (z_loc + (z_coeff[0] * t[0]) - z_coeff[1]) / z_coeff[0]
     
     # differentiate each position function w.r.t. time to find velocities
     x_vel = np.polyder(x_coeff)[0]
@@ -80,8 +80,8 @@ def mid_velocities(z_loc, x_coeff, y_coeff, z_coeff):
     return ball_vel
     
     
-z_loc = 4.275   # desired z location to analyze (in meters)
-print(mid_velocities(z_loc, x_coeff, y_coeff, z_coeff))
+#z_loc = 4.275   # desired z location to analyze (in meters)
+#print(mid_velocities(z_loc, x_coeff, y_coeff, z_coeff))
     
     
   
