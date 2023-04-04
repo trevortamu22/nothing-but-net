@@ -8,6 +8,7 @@ import sys
 
 #import brute_force
 import motor_controller
+from motor_steps import motor_steps
 
 def mask_to_circle(img, min_radius):
     contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -24,7 +25,6 @@ def is_flying(pos):
     return a < -4.35 and a > -5.45
 
 def calculate_angle(pos):
-    return True # Temp output
     t = pos[:, 0]/(10**6)
     t = t - t[0]
     x = pos[:, 1]/1000
@@ -33,14 +33,22 @@ def calculate_angle(pos):
     x_coeff = np.polyfit(t[:limit], x[:limit], 1)
     y_coeff = np.polyfit(t[:limit], -y[:limit], 2)
     z_coeff = np.polyfit(t[:limit], z[:limit], 1)
+    
+    theta_z = 6.35 * (np.pi/180)
+    theta_x = -3.67 * (np.pi/180)
+    return (theta_z, theta_x) # Temp output (radians)
+    
     return brute_force.brute_force(x_coeff,y_coeff,z_coeff)
 
-def calc_motor_angles(solution):
-    return 200, 200, 200
-
 def main():
+    # Set System Variables
     WHITE_BALANCE = 3500
     MIN_POINTS = 5
+    
+    # Import motor calibration data
+    motor1_cal = np.loadtxt('calibration_data/motor1_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
+    motor2_cal = np.loadtxt('calibration_data/motor2_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
+    motor3_cal = np.loadtxt('calibration_data/motor3_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
     
     # Define which camera modes to use (color res and depth FOV)
     color_res = pyk4a.ColorResolution.RES_1536P
@@ -98,7 +106,7 @@ def main():
                             data_points = data_points[-MIN_POINTS:]
                             solution = calculate_angle(data_points)
                             if solution is not None:
-                                steps = calc_motor_angles(solution) # This may change to a simple array call
+                                steps = motor_steps(*solution, motor1_cal, motor2_cal, motor3_cal)
                                 motor_controller.move(serial_con, *steps)
                                 t_final = k4a.get_capture().color_timestamp_usec
                                 break
