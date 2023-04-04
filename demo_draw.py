@@ -128,8 +128,8 @@ x_board, y_board, z_board = cart_ang[index]
 x_in, y_in, z_in = input_vect[index]
 #store output trajectory of closest impact
 x_out, y_out, z_out = output_vect[index]
-
-
+print('normal', cart_ang[index])
+print('intercept', intercept_list[index])
 
 # Set the origin point of the vectors
 origin = [x_int, z_int, y_int]

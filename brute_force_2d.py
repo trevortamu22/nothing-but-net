@@ -4,16 +4,20 @@ from math import sin, cos, sqrt
 from point_of_contact import end_point, mid_point
 from end_velocities import end_velocities, mid_velocities
 from sympy.solvers import nsolve
-from sympy import Symbol
+from sympy import symbols
 import csv
 
 #determines the intercept in the y-z plane for the backboard given the y and z coefficients of parametric equations, and the backboard angle to be evaluated
 def intercept_yz(y_coeff, z_coeff, board_angle):
-    t1, t2 = Symbol('t1 t2')
+    t1, t2 = symbols('t1 t2')
     Ball_Path = ((y_coeff[0]*t1**2 + y_coeff[1]*t1 + y_coeff[2]), (z_coeff[0]*t1 + z_coeff[1]))
-    Backboard_Angle = (board_angle[0]*t2, -board_angle[1]*t2)
-    t = nsolve([Ball_Path[0] - Backboard_Angle[0], Ball_Path[1] - Backboard_Angle[1]], [t1, t2], [0.1, 0.1])
-    return t
+    Backboard_Angle = ((board_angle[1]*t2), (-1 * board_angle[0]*t2))
+    con_t1, con_t2 = nsolve([Ball_Path[0] - Backboard_Angle[0], Ball_Path[1] - Backboard_Angle[1]], [t1, t2], [0, 0])
+    convergence1 = ((y_coeff[0]*con_t1**2 + y_coeff[1]*con_t1 + y_coeff[2]), (z_coeff[0]*con_t1 + z_coeff[1]))
+    convergence2 = ((board_angle[1]*con_t2), (-1 * board_angle[0]*con_t2))
+    '''print(convergence1)
+    print(convergence2)'''
+    return convergence1
 
 
 
@@ -77,8 +81,8 @@ def brute_force_2d(x_coeff, y_coeff, z_coeff):
         #determine intercept of ball for the given normal angle of bboard
         '''compare intercept between two lines for x-z intercept.
         the time at z position should tell y-intersept, verify this by determining intercept between parabola and line'''
-        yz_int = intercept_yz(y_coeff, z_coeff, [cart_ang[1], cart_ang[2]])
-        y_vel = mid_velocities(yz_int[1], x_coeff, y_coeff, z_coeff)
+        yz_int = intercept_yz(y_coeff, z_coeff, [j[1], j[2]])
+        y_vel = mid_velocities(yz_int[0], x_coeff, y_coeff, z_coeff)
         y_vel = y_vel[1]
 
         
@@ -86,8 +90,8 @@ def brute_force_2d(x_coeff, y_coeff, z_coeff):
         intercept = [yz_int[0], yz_int[1]]
 
         #these dont need to be here in final code, just used for visualization
-        '''intercept_list.append(intercept)
-        input_vect.append(velocity)'''
+        intercept_list.append(intercept)
+        input_vect.append(velocity)
 
         #determine the angular components in spherical coordinates of the trajectory at the given intercept point
         '''this should be exactly the same as previous work'''
@@ -113,8 +117,8 @@ def brute_force_2d(x_coeff, y_coeff, z_coeff):
         
         output_vect.append([y_out, z_out])
 
-        z_hoop = intercept[2] - hoop_center[2]
-        y_hoop = intercept[1] - hoop_center[1]
+        z_hoop = intercept[1] - hoop_center[2]
+        y_hoop = intercept[0] - hoop_center[1]
 
         hoop_mag = sqrt(y_hoop**2 + z_hoop**2)
         closest = np.dot([y_out, z_out], [y_hoop, z_hoop])
@@ -122,7 +126,7 @@ def brute_force_2d(x_coeff, y_coeff, z_coeff):
         dist = sqrt(hoop_mag**2 - closest**2)
         dist_center.append(dist)
         index += 1
-    return dist_center
+    return dist_center, intercept_list, input_vect, output_vect
 
 
 

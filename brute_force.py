@@ -3,8 +3,11 @@ import numpy as np
 from math import sin, cos, sqrt
 from point_of_contact import end_point, mid_point
 from end_velocities import end_velocities, mid_velocities
-from back_calc import intercept_xz
+from sympy.solvers import solve
+from sympy import Symbol
+import sympy
 import csv
+import time
 ###This code is SUUUPERRRR rough but it works in determining the best angle###
 
 
@@ -33,7 +36,7 @@ for i in board_angles:
 
 
 
-'''#read in the trajectory of the ball using sample data
+#read in the trajectory of the ball using sample data
 ###import camera data and format (more info in point_of_contact)###
 csv_data = np.loadtxt('arc1.csv', delimiter=',')
 t = csv_data[:, 0]/(10**6)
@@ -46,7 +49,7 @@ limit = len(t)
 
 x_coeff = np.polyfit(t[:limit], x[:limit], 1)
 y_coeff = np.polyfit(t[:limit], -y[:limit], 2)
-z_coeff = np.polyfit(t[:limit], z[:limit], 1)'''
+z_coeff = np.polyfit(t[:limit], z[:limit], 1)
 
 
 
@@ -55,11 +58,8 @@ def brute_force(x_coeff, y_coeff, z_coeff):
     #establish hoop center
     hoop_center = [0, -0.2032, .2032]
     #determine intercepts at z=0 and vector components of each axis
-    start_intercept = end_point(x_coeff, y_coeff, z_coeff)
-    vel = end_velocities(x_coeff, y_coeff, z_coeff)
-    xz_intercept = [start_intercept[0], start_intercept[2]]
-    #store slope of ball in x-z plane
-    ball_slope = [vel[0], vel[2]]
+    
+    vel = end_velocities(x_coeff, y_coeff, z_coeff)    
 
     #create variable to store closest distances to center of hoop, intercepts, and angle of attack
     dist_center = []
@@ -69,61 +69,83 @@ def brute_force(x_coeff, y_coeff, z_coeff):
     index = 0
 
     for j in cart_ang:
+        start = time.perf_counter()
+        sol = 100
         #determine intercept of ball for the given normal angle of bboard
-        '''compare intercept between two lines for x-z intercept.
-        the time at z position should tell y-intersept, verify this by determining intercept between parabola and line'''
-        xz_int = intercept_xz([j[0], j[2]], ball_slope, xz_intercept)
-        y_vel = mid_velocities(xz_int[1], x_coeff, y_coeff, z_coeff)
-        y_vel = y_vel[1]
+        #represent the trajectory of the ball in parametric equations, and the normal plane in terms of x, y, and z
+        #solve for t when convergence occurs
+        t1 = Symbol('t1')
+        Ball_Path = ((x_coeff[0]*t1 + x_coeff[1]), (y_coeff[0]*t1**2 + y_coeff[1]*t1 + y_coeff[2]), (z_coeff[0]*t1 + z_coeff[1]))
+        Backboard_Angle = ((j[0]*Ball_Path[0]) + (j[1]*Ball_Path[1]) + (j[2]*Ball_Path[2]))
+        t_sol = solve([Backboard_Angle], [t1])
+        fin = time.perf_counter()
+        tot_time = (fin - start)
+        print(f"time to optimize: {tot_time: 0.6f} seconds")
+        for i in t_sol:
+            if type(i[0]) is not sympy.core.numbers.Float:
+                sol = None
+                break
 
-        y_int = mid_point(xz_int[1], x_coeff, y_coeff, z_coeff)
-        y_int = y_int[1]
+            elif sol > abs(i[0]):
+                sol = i[0]
+
+            elif sol < abs(i[0]):
+                sol = sol
+        #print(sol)
         
-        velocity = [-vel[0], -y_vel, -vel[2]]
-        intercept = [xz_int[0], y_int, xz_int[1]]
+        if sol == None:
+            index += 1
+            pass
 
-        #these dont need to be here in final code, just used for visualization
-        intercept_list.append(intercept)
-        input_vect.append(velocity)
+        else:
+            xyz_int = ((x_coeff[0]*sol + x_coeff[1]), (y_coeff[0]*sol**2 + y_coeff[1]*sol + y_coeff[2]), (z_coeff[0]*sol + z_coeff[1]))
 
-        #determine the angular components in spherical coordinates of the trajectory at the given intercept point
-        '''this should be exactly the same as previous work'''
-        r = sqrt(velocity[0]**2 + velocity[1]**2 + velocity[2]**2)
-        in_phi = np.arccos(velocity[1]/r)
-        in_theta = np.arctan(velocity[0] / velocity[2])
-        
-        #determine reflected trajectory
-        '''convert from cartesian to spherical coordinates to get angle, compare angle to normal and determine output angle through 
-        addition(?) subtraction(?) <---need to figure this out, probably just some conditional statement.
-        convert output angle back to cartesian coordinates (already unit vector)'''
-        phi, theta = board_angles[index]
-        diff_ang_phi = phi - in_phi
-        diff_ang_theta = theta - in_theta
-        out_phi = phi + diff_ang_phi
-        out_theta = theta + diff_ang_theta
-        
-        #compare reflected trajectory (unit vec) to vector of intercept point to hoop center, then perform pythagorean theorem to determine...
-        #...closest distance to center of hoop (I dont think this is the best way to go about this but its the current potential solution)
-        #smallest dist to center gets selected to be the angle of choice
-        '''useful link: https://forum.unity.com/threads/how-do-i-find-the-closest-point-on-a-line.340058/
-        Choose the ten(?) smallest distances and plot them for verification
-        also run the time it takes to determine only the closest distance and output'''
-        x_out = sin(out_phi)*sin(out_theta)
-        y_out = cos(out_phi)
-        z_out = sin(out_phi)*cos(out_theta)
-        
-        output_vect.append([x_out, y_out, z_out])
+            y_vel = mid_velocities(xyz_int[2], x_coeff, y_coeff, z_coeff)
 
-        x_hoop = intercept[0]
-        z_hoop = intercept[2] - hoop_center[2]
-        y_hoop = intercept[1] - hoop_center[1]
+            velocity = [-vel[0], -y_vel[1], -vel[2]]
+            intercept = [xyz_int[0], xyz_int[1], xyz_int[2]]
 
-        hoop_mag = sqrt(x_hoop**2 + y_hoop**2 + z_hoop**2)
-        closest = np.dot([x_out, y_out, z_out], [x_hoop, y_hoop, z_hoop])
+            #these dont need to be here in final code, just used for visualization
+            intercept_list.append(intercept)
+            input_vect.append(velocity)
 
-        dist = sqrt(hoop_mag**2 - closest**2)
-        dist_center.append(dist)
-        index += 1
+            #determine the angular components in spherical coordinates of the trajectory at the given intercept point
+            '''this should be exactly the same as previous work'''
+            r = sqrt(velocity[0]**2 + velocity[1]**2 + velocity[2]**2)
+            in_phi = np.arccos(float(velocity[1]/r))
+            in_theta = np.arctan(velocity[0] / velocity[2])
+            
+            #determine reflected trajectory
+            '''convert from cartesian to spherical coordinates to get angle, compare angle to normal and determine output angle 
+            convert output angle back to cartesian coordinates (already unit vector)'''
+            phi, theta = board_angles[index]
+            diff_ang_phi = phi - in_phi
+            diff_ang_theta = theta - in_theta
+            out_phi = phi + diff_ang_phi
+            out_theta = theta + diff_ang_theta
+            
+            #compare reflected trajectory (unit vec) to vector of intercept point to hoop center, then perform pythagorean theorem to determine...
+            #...closest distance to center of hoop (I dont think this is the best way to go about this but its the current potential solution)
+            #smallest dist to center gets selected to be the angle of choice
+            '''useful link: https://forum.unity.com/threads/how-do-i-find-the-closest-point-on-a-line.340058/
+            also run the time it takes to determine only the closest distance and output'''
+            x_out = sin(out_phi)*sin(out_theta)
+            y_out = cos(out_phi)
+            z_out = sin(out_phi)*cos(out_theta)
+            
+            output_vect.append([x_out, y_out, z_out])
+
+            x_hoop = intercept[0]
+            z_hoop = intercept[2] - hoop_center[2]
+            y_hoop = intercept[1] - hoop_center[1]
+
+            hoop_mag = sqrt(x_hoop**2 + y_hoop**2 + z_hoop**2)
+            closest = np.dot([x_out, y_out, z_out], [x_hoop, y_hoop, z_hoop])
+
+            dist = sqrt(hoop_mag**2 - closest**2)
+            dist_center.append(dist)
+            index += 1
+        #break
     return dist_center, intercept_list, input_vect, output_vect
 
 
