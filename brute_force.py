@@ -6,10 +6,39 @@ from end_velocities import end_velocities, mid_velocities
 from sympy.solvers import solve
 from sympy import Symbol
 import sympy
+import math
 import csv
 import time
 ###This code is SUUUPERRRR rough but it works in determining the best angle###
 
+
+def equationroots(a, b, c):
+ 
+    # calculating discriminant using formula
+    dis = b * b - 4 * a * c
+    sqrt_val = math.sqrt(abs(dis))
+     
+    # checking condition for discriminant
+    #real and different roots
+    if dis > 0:
+        sol1 = ((-b + sqrt_val)/(2 * a))
+        sol2 = ((-b - sqrt_val)/(2 * a))
+        if abs(sol1) > abs(sol2):
+            sol = sol2
+
+        else:
+            sol = sol1    
+    #real and same roots
+    elif dis == 0:
+        
+        sol = (-b / (2 * a))
+     
+    # when discriminant is less than 0
+    #non-real numbers
+    else:
+        sol = None
+    
+    return sol
 
 
 ###THIS NEEDS TO BE IN FINAL PYTHON FILE###
@@ -55,6 +84,7 @@ z_coeff = np.polyfit(t[:limit], z[:limit], 1)
 
 #brute force function
 def brute_force(x_coeff, y_coeff, z_coeff):
+    
     #establish hoop center
     hoop_center = [0, -0.2032, .2032]
     #determine intercepts at z=0 and vector components of each axis
@@ -69,19 +99,22 @@ def brute_force(x_coeff, y_coeff, z_coeff):
     index = 0
 
     for j in cart_ang:
-        start = time.perf_counter()
+        
         sol = 100
         #determine intercept of ball for the given normal angle of bboard
         #represent the trajectory of the ball in parametric equations, and the normal plane in terms of x, y, and z
         #solve for t when convergence occurs
-        t1 = Symbol('t1')
+        a = y_coeff[0]*j[1]
+        b = x_coeff[0]*j[0] + y_coeff[1]*j[1] + z_coeff[0]*j[2]
+        c = x_coeff[1]*j[0] + y_coeff[2]*j[1] + z_coeff[1]*j[2]
+        sol = equationroots(a, b, c)
+        '''t1 = Symbol('t1')
         Ball_Path = ((x_coeff[0]*t1 + x_coeff[1]), (y_coeff[0]*t1**2 + y_coeff[1]*t1 + y_coeff[2]), (z_coeff[0]*t1 + z_coeff[1]))
         Backboard_Angle = ((j[0]*Ball_Path[0]) + (j[1]*Ball_Path[1]) + (j[2]*Ball_Path[2]))
-        t_sol = solve([Backboard_Angle], [t1])
-        fin = time.perf_counter()
-        tot_time = (fin - start)
-        print(f"time to optimize: {tot_time: 0.6f} seconds")
-        for i in t_sol:
+        t_sol = solve([Backboard_Angle], [t1])'''
+        
+        
+        '''for i in t_sol:
             if type(i[0]) is not sympy.core.numbers.Float:
                 sol = None
                 break
@@ -90,7 +123,7 @@ def brute_force(x_coeff, y_coeff, z_coeff):
                 sol = i[0]
 
             elif sol < abs(i[0]):
-                sol = sol
+                sol = sol'''
         #print(sol)
         
         if sol == None:
@@ -145,7 +178,8 @@ def brute_force(x_coeff, y_coeff, z_coeff):
             dist = sqrt(hoop_mag**2 - closest**2)
             dist_center.append(dist)
             index += 1
-        #break
+        break
+    
     return dist_center, intercept_list, input_vect, output_vect
 
 
