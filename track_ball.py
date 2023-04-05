@@ -38,7 +38,7 @@ def calculate_angle(pos):
     #theta_x = -3.67 * (np.pi/180)
     #return (theta_z, theta_x) # Temp output (radians)
     
-    return find_angles(x_coeff,y_coeff,z_coeff)
+    return find_angles(x_coeff,y_coeff,z_coeff, True)
 
 def main():
     # Set System Variables

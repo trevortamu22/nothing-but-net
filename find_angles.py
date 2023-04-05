@@ -30,8 +30,7 @@ def solve_all_roots(coeffs):
     
 def end_velocities(x_coeff, y_coeff, z_coeff):
     # find time hitting backboard
-    contact_time = np.roots(z_coeff)[0] 
-    
+    contact_time = -z_coeff[1]/z_coeff[0] 
     # we now have to substitute the time at which the ball contacts the backboard 
     # because the y velocity is a function of time
     y_vel = 2*y_coeff[0]*contact_time+y_coeff[1]
@@ -41,7 +40,7 @@ def end_velocities(x_coeff, y_coeff, z_coeff):
 
 
 #brute force function
-def brute_force(x_coeff, y_coeff, z_coeff):
+def brute_force(x_coeff, y_coeff, z_coeff, validate):
     
     #establish hoop center
     hoop_center = [[0], [-0.2032], [.2032]] # Lots of brackets force proper shape for repeat
@@ -62,9 +61,20 @@ def brute_force(x_coeff, y_coeff, z_coeff):
     close_vecs = (output_vectors*hoop_pos).sum(axis=0)
     dists = np.sqrt(hoop_mags - close_vecs**2)
     
-    return dists.tolist(), xyz_ints.T, velocities.T, output_vectors.T
+    if validate:
+        # Validation Code contact time is being calculated a second time slowing stuff down
+        valid = dists < 0.05
+        contact_time = -z_coeff[1]/z_coeff[0]
+        position = np.matmul(coeff, [contact_time**2, contact_time, 1])
+        if(np.abs(position[0]) > 0.28 or np.abs(position[1]) > 0.19): valid = False
+    else:
+        valid = True
+    return dists.tolist(), xyz_ints.T, velocities.T, output_vectors.T, sols, valid
 
 
-def find_angles(x_coeff, y_coeff, z_coeff):
-    dist, _, _, _ = brute_force(x_coeff, y_coeff, z_coeff)
-    return board_angles[dist.index(np.nanmin(dist))]
+def find_angles(x_coeff, y_coeff, z_coeff, validate):
+    dist, _, _, _, _, valid = brute_force(x_coeff, y_coeff, z_coeff, validate)
+    min_dist = np.nanmin(dist, initial=1, where=valid)
+    if min_dist > 0:
+        return board_angles[dist.index(min_dist)]
+    return None
