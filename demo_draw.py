@@ -4,6 +4,7 @@ from numpy.polynomial import Polynomial
 from math import sin, cos
 import csv
 from brute_force import brute_force
+import time
 
 
 # Create a 3D plot
@@ -114,10 +115,12 @@ for i in board_angles:
     cart_ang.append([x_cart, y_cart, z_cart])
 
 
-
+start = time.perf_counter()
 #run brute force function and store list of intercepts, input vectors, and output vectors
 dist_center, intercept_list, input_vect, output_vect = brute_force(x_coeff, y_coeff, z_coeff)
-
+fin = time.perf_counter()
+tot_time = (fin - start)
+print(f"time to optimize: {tot_time: 0.6f} seconds")
 #determine position in list of closest reflection
 index = dist_center.index(min(dist_center))
 #store intercept of closest impact
