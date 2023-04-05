@@ -6,9 +6,9 @@ from pyk4a import Config, PyK4A, Calibration
 import time
 import sys
 
-#import brute_force
 import motor_controller
 from motor_steps import motor_steps
+from find_angles import find_angles
 
 def mask_to_circle(img, min_radius):
     contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -30,15 +30,15 @@ def calculate_angle(pos):
     x = pos[:, 1]/1000
     y = pos[:, 2]/1000
     z = pos[:, 3]/1000
-    x_coeff = np.polyfit(t[:limit], x[:limit], 1)
-    y_coeff = np.polyfit(t[:limit], -y[:limit], 2)
-    z_coeff = np.polyfit(t[:limit], z[:limit], 1)
+    x_coeff = np.polyfit(t, x, 1)
+    y_coeff = np.polyfit(t, -y, 2)
+    z_coeff = np.polyfit(t, z, 1)
     
-    theta_z = 6.35 * (np.pi/180)
-    theta_x = -3.67 * (np.pi/180)
-    return (theta_z, theta_x) # Temp output (radians)
+    #theta_z = 6.35 * (np.pi/180)
+    #theta_x = -3.67 * (np.pi/180)
+    #return (theta_z, theta_x) # Temp output (radians)
     
-    return brute_force.brute_force(x_coeff,y_coeff,z_coeff)
+    return find_angles(x_coeff,y_coeff,z_coeff)
 
 def main():
     # Set System Variables
