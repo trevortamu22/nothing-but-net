@@ -67,4 +67,4 @@ def brute_force(x_coeff, y_coeff, z_coeff):
 
 def find_angles(x_coeff, y_coeff, z_coeff):
     dist, _, _, _ = brute_force(x_coeff, y_coeff, z_coeff)
-    return board_angles[dist.index(min(dist))]
+    return board_angles[dist.index(np.nanmin(dist))]
