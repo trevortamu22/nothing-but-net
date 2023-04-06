@@ -42,4 +42,4 @@ def motor_steps(theta_z, theta_x, motor1_array, motor2_array, motor3_array):
     motor2_step_command += -1*(motor3_step_command)
     
     
-    return motor1_step_command, motor2_step_command, motor3_step_command
+    return -motor1_step_command, -motor2_step_command, motor3_step_command

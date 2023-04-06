@@ -3,7 +3,7 @@ import numpy as np
 from numpy.polynomial import Polynomial
 from math import sin, cos
 import csv
-from brute_force import brute_force
+from find_angles import brute_force
 import time
 
 
@@ -38,7 +38,7 @@ for edge in edges:
 
 #########################  Plotting the Circle ################################
 # Define the circle center and radius
-center = (0, 0.2032, -.2032) #hoop located level with bottom of backboard, 1 radius out
+center = (0, 0.27, -.16) #hoop located level with bottom of backboard, 1 radius out
 radius = 0.1016 #meters (8in)
 
 # Define the number of points used to plot the circle
@@ -61,13 +61,13 @@ ax.set_zlabel("Height")
 
 
 #plot the scatter and line of best fit
-csv_data = np.loadtxt('arc1.csv', delimiter=',')
+csv_data = np.loadtxt('last_toss.csv', delimiter=',')
 
 t = csv_data[:, 0]/(10**6)
 t = t - t[0]
-x = (csv_data[:, 1]/1000) + 0.1
-y = (csv_data[:, 2]/1000) - 0.9
-z = csv_data[:, 3]/1000
+x = (csv_data[:, 1]/1000)
+y = (csv_data[:, 2]/1000)-.34
+z = csv_data[:, 3]/1000-.265
 
 limit = 0
 if limit < 2:
@@ -117,12 +117,16 @@ for i in board_angles:
 
 start = time.perf_counter()
 #run brute force function and store list of intercepts, input vectors, and output vectors
-dist_center, intercept_list, input_vect, output_vect = brute_force(x_coeff, y_coeff, z_coeff)
+dist_center, intercept_list, input_vect, output_vect, _, valid = brute_force(x_coeff, y_coeff, z_coeff, False)
 fin = time.perf_counter()
 tot_time = (fin - start)
 print(f"time to optimize: {tot_time: 0.6f} seconds")
 #determine position in list of closest reflection
-index = dist_center.index(min(dist_center))
+min_dist = np.nanmin(dist_center, initial=1, where=valid)
+if min_dist > 0:
+    index = dist_center.index(min_dist)
+else:
+    index = 0
 #store intercept of closest impact
 x_int, y_int, z_int = intercept_list[index]
 #store backboard angle of closest impact
