@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import Polynomial
-from math import sin, cos
+from math import sin, cos, pi
 import csv
 from brute_force import brute_force
 import time
@@ -65,8 +65,8 @@ csv_data = np.loadtxt('arc1.csv', delimiter=',')
 
 t = csv_data[:, 0]/(10**6)
 t = t - t[0]
-x = (csv_data[:, 1]/1000) + 0.1
-y = (csv_data[:, 2]/1000) - 0.9
+x = (csv_data[:, 1]/1000) - 0.15
+y = (csv_data[:, 2]/1000) - 0.85
 z = csv_data[:, 3]/1000
 
 limit = 0
@@ -117,7 +117,7 @@ for i in board_angles:
 
 start = time.perf_counter()
 #run brute force function and store list of intercepts, input vectors, and output vectors
-dist_center, intercept_list, input_vect, output_vect = brute_force(x_coeff, y_coeff, z_coeff)
+dist_center, intercept_list, input_vect, output_vect, input_sphere, output_sphere = brute_force(x_coeff, y_coeff, z_coeff)
 fin = time.perf_counter()
 tot_time = (fin - start)
 print(f"time to optimize: {tot_time: 0.6f} seconds")
@@ -131,8 +131,18 @@ x_board, y_board, z_board = cart_ang[index]
 x_in, y_in, z_in = input_vect[index]
 #store output trajectory of closest impact
 x_out, y_out, z_out = output_vect[index]
-print('normal', cart_ang[index])
-print('intercept', intercept_list[index])
+
+def rad2deg(list):
+    new_list = []
+    for i in list:
+        new_list.append(i * (180/pi))
+    return new_list
+
+print('backboard normal (degrees):', rad2deg(board_angles[index]))
+print('input angle (degrees):', rad2deg(input_sphere[index]))
+print('output angle (degrees):', rad2deg(output_sphere[index]))
+print('intercept (m):', intercept_list[index])
+print('distance to center at closest point (m): ', dist_center[index])
 
 # Set the origin point of the vectors
 origin = [x_int, z_int, y_int]
@@ -161,7 +171,6 @@ for edge in edges:
 
 
 # Set the initial view of the plot
-#ax.view_init(30, 750)
-ax.view_init(azim=0, elev=90)
+ax.view_init(30, 750)
+#ax.view_init(azim=0, elev=90)
 plt.show()
-print('distance to center at closest point: ', dist_center[index])

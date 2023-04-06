@@ -12,6 +12,7 @@ import time
 ###This code is SUUUPERRRR rough but it works in determining the best angle###
 
 
+
 def equationroots(a, b, c):
  
     # calculating discriminant using formula
@@ -94,6 +95,8 @@ def brute_force(x_coeff, y_coeff, z_coeff):
     #create variable to store closest distances to center of hoop, intercepts, and angle of attack
     dist_center = []
     intercept_list = []
+    input_sphere = []
+    output_sphere = []
     input_vect = []
     output_vect = []
     index = 0
@@ -148,6 +151,7 @@ def brute_force(x_coeff, y_coeff, z_coeff):
             in_phi = np.arccos(float(velocity[1]/r))
             in_theta = np.arctan(velocity[0] / velocity[2])
             
+            input_sphere.append([in_phi, in_theta])
             #determine reflected trajectory
             '''convert from cartesian to spherical coordinates to get angle, compare angle to normal and determine output angle 
             convert output angle back to cartesian coordinates (already unit vector)'''
@@ -157,6 +161,7 @@ def brute_force(x_coeff, y_coeff, z_coeff):
             out_phi = phi + diff_ang_phi
             out_theta = theta + diff_ang_theta
             
+            output_sphere.append([out_phi, out_theta])
             #compare reflected trajectory (unit vec) to vector of intercept point to hoop center, then perform pythagorean theorem to determine...
             #...closest distance to center of hoop (I dont think this is the best way to go about this but its the current potential solution)
             #smallest dist to center gets selected to be the angle of choice
@@ -168,19 +173,27 @@ def brute_force(x_coeff, y_coeff, z_coeff):
             
             output_vect.append([x_out, y_out, z_out])
 
-            x_hoop = intercept[0]
+            '''x_hoop = intercept[0]
             z_hoop = intercept[2] - hoop_center[2]
             y_hoop = intercept[1] - hoop_center[1]
 
             hoop_mag = sqrt(x_hoop**2 + y_hoop**2 + z_hoop**2)
             closest = np.dot([x_out, y_out, z_out], [x_hoop, y_hoop, z_hoop])
 
-            dist = sqrt(hoop_mag**2 - closest**2)
+            dist = sqrt(hoop_mag**2 - closest**2)'''
+
+
+            parameter = (hoop_center[1] - intercept[1]) / y_out
+            x_plane = intercept[0] + x_out * parameter
+            z_plane = intercept[2] + z_out * parameter
+
+            dist = sqrt((x_plane - hoop_center[0])**2 + (z_plane - hoop_center[2])**2)
+
             dist_center.append(dist)
             index += 1
-        break
+        #break
     
-    return dist_center, intercept_list, input_vect, output_vect
+    return dist_center, intercept_list, input_vect, output_vect, input_sphere, output_sphere
 
 
 
