@@ -1,4 +1,6 @@
 /__pycache__
 run.bat
 draw.bat
+plot_toss.bat
 last_toss.csv
+full_last_run.csv
