@@ -18,11 +18,11 @@ def mask_to_circle(img, min_radius):
             return int(center[0]), int(center[1]), int(radius)
     return -1000, -1000, -1000
 
-def is_flying(pos):
+def is_flying(pos, thresh):
     pos = np.array(pos)
     a = np.polyfit(pos[:,0], -pos[:,2], 2)[0]*10**9
-    #if a < -4.35 and a > -5.45: print('Toss g =', round(-2*a, 2), 'm/s^2')
-    return a < -4.35 and a > -5.45
+    return = abs(4.9+a) < thresh
+
 
 def calculate_angle(pos):
     t = pos[:, 0]/(10**6)
@@ -43,7 +43,9 @@ def calculate_angle(pos):
 def main():
     # Set System Variables
     WHITE_BALANCE = 3500
-    MIN_POINTS = 6
+    MIN_POINTS = 4
+    START_FLIGHT_TOL = 0.55
+    LOCK_FLIGHT_TOL = 0.4
     
     # Import motor calibration data
     motor1_cal = np.loadtxt('calibration_data/motor1_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
@@ -69,7 +71,7 @@ def main():
     # Set white balance for the color camera
     k4a.whitebalance = WHITE_BALANCE
     print('White Balance:', WHITE_BALANCE)
-    print('Using', MIN_POINTS, 'Flight Points')
+    print('Using Minimum', MIN_POINTS, 'Flight Points')
     
     # Define the calibration object to allow coordinate transformations
     cal = Calibration.from_raw(k4a.calibration_raw, depth_cam_mode, color_res)
@@ -84,11 +86,13 @@ def main():
     capture_color = np.zeros((1080,1920,3), dtype=np.uint8)
     
     data_points = []
+    all_points = []
     times = [0]
     t_final = 0
     
     # Main loop (runs until Ctrl+C is pressed)
     while 1:
+        in_flight = False
         print('\nWaiting for toss!',end='\r')
         while 1:
             t1 = time.process_time_ns()
@@ -101,22 +105,28 @@ def main():
                 x, y, r = mask_to_circle(blur, 15)
                 if x > -1000 and x < 2048 and y < 1536 and capture.transformed_depth[y,x] > 0:
                     data_points.append((capture.color_timestamp_usec, *cal.convert_2d_to_3d((x,y), capture.transformed_depth[y,x], pyk4a.CalibrationType.COLOR)))
-                    #print(data_points[-1][1], -(data_points[-1][2]-340),data_points[-1][3]-265)
-                    if(len(data_points) > MIN_POINTS):
-                        if is_flying(data_points[-MIN_POINTS:]):
+                    all_points.append(data_points[-1])
+                    if(len(data_points) >= MIN_POINTS):
+                        if not in_flight and is_flying(data_points[-MIN_POINTS:], START_FLIGHT_TOL):
+                            in_flight = True
                             data_points = data_points[-MIN_POINTS:]
+                        if is_flying(data_points, LOCK_FLIGHT_TOL):
                             solution = calculate_angle(np.array(data_points))
                             if solution is not None:
                                 steps = motor_steps(*solution, motor1_cal, motor2_cal, motor3_cal)
                                 motor_controller.move(serial_con, *steps)
                                 t_final = k4a.get_capture().color_timestamp_usec
+                                print('Used', len(data_points), 'to find solution!')
                                 break
+                        elif len(data_points) > MIN_POINTS and not is_flying(data_points, START_FLIGHT_TOL):
+                            in_flight = False
                     times.append((time.process_time_ns()-t1)/(10**6))
         # Sleep system and return home
         time.sleep(1)
         motor_controller.returnhome(serial_con)
         print('Max time:', max(times), 'ms\tAverage Time:', sum(times)//len(times), 'ms\tTotal Time:', int((t_final-data_points[0][0])/1000), 'ms')
         np.savetxt('last_toss.csv', np.array(data_points), delimiter=",")
+    np.savetxt('full_last_run.csv', np.array(all_points), delimiter=",")
     k4a.stop()
     serial_con.close()
 
