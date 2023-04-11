@@ -10,21 +10,21 @@ const int home_delay = 1000; //ms
 // Setting the Stepper Motors Speed and Acceleration
 ///////////// MOTOR ONE ///////////////
 const int mtr1_maxspeed = 2000;
-const int mtr1_acceleration = 25000;
+const int mtr1_acceleration = 35000;
 //const int mtr1_speed = 500000;
 //Return Conditions
 const int mtr1_rmaxspeed = 1000;
 const int mtr1_racceleration = 500;
 ////////////// MOTOR TWO //////////////
 const int mtr2_maxspeed = 2000;
-const int mtr2_acceleration = 25000;
+const int mtr2_acceleration = 35000;
 //const int mtr2_speed = 500000;
 //Return Conditions
 const int mtr2_rmaxspeed = 1000;
 const int mtr2_racceleration = 500;
 //////////// MOTOR THREE ///////////////
 const int mtr3_maxspeed = 2000;
-const int mtr3_acceleration = 25000;
+const int mtr3_acceleration = 35000;
 //const int mtr3_speed = 500000;
 //Return Conditions
 const int mtr3_rmaxspeed = 1000;

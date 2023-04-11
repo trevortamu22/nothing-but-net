@@ -43,7 +43,7 @@ def end_velocities(x_coeff, y_coeff, z_coeff):
 def brute_force(x_coeff, y_coeff, z_coeff, validate):
     
     #establish hoop center
-    hoop_center = [[0], [-0.27], [.14]] # Lots of brackets force proper shape for repeat
+    hoop_center = [[0], [-0.27], [.185]] # Lots of brackets force proper shape for repeat
     vel = end_velocities(x_coeff, y_coeff, z_coeff)    
     coeff = np.array([[0, *x_coeff],[*y_coeff],[0, *z_coeff]])
     ang_coeffs = np.matmul(cart_ang,coeff) # all quadratic coeffs
@@ -57,9 +57,15 @@ def brute_force(x_coeff, y_coeff, z_coeff, validate):
     sin_out_phi = np.sin(out_angles[:,0]) # Store to save time. May be faster to recalc.
     output_vectors = np.stack((sin_out_phi*np.sin(out_angles[:,1]), np.cos(out_angles[:,0]), sin_out_phi*np.cos(out_angles[:,1])))
     hoop_pos = xyz_ints - np.repeat(hoop_center, len(sols), axis = 1)
-    hoop_mags = (hoop_pos**2).sum(axis=0) # should sqrt but it just gets undone
-    close_vecs = (output_vectors*hoop_pos).sum(axis=0)
-    dists = np.sqrt(hoop_mags - close_vecs**2)
+    
+    #hoop_mags = (hoop_pos**2).sum(axis=0) # should sqrt but it just gets undone
+    #close_vecs = (output_vectors*hoop_pos).sum(axis=0)
+    #dists = np.sqrt(hoop_mags - close_vecs**2)
+    
+    y_param = hoop_pos[1, :]/-output_vectors[1,:]
+    x_plane = hoop_pos[0] + output_vectors[0]*y_param
+    z_plane = hoop_pos[2] + output_vectors[2]*y_param
+    dists = np.sqrt(x_plane**2 + z_plane**2)
     
     if validate:
         # Validation Code contact time is being calculated a second time slowing stuff down

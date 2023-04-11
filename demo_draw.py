@@ -38,7 +38,7 @@ for edge in edges:
 
 #########################  Plotting the Circle ################################
 # Define the circle center and radius
-center = (0, 0.27, -.16) #hoop located level with bottom of backboard, 1 radius out
+center = (0, 0.185, -0.27) #hoop located level with bottom of backboard, 1 radius out
 radius = 0.1016 #meters (8in)
 
 # Define the number of points used to plot the circle
@@ -65,15 +65,9 @@ csv_data = np.loadtxt('last_toss.csv', delimiter=',')
 
 t = csv_data[:, 0]/(10**6)
 t = t - t[0]
-<<<<<<< HEAD
-x = (csv_data[:, 1]/1000) - 0.15
-y = (csv_data[:, 2]/1000) - 0.85
-z = csv_data[:, 3]/1000
-=======
 x = (csv_data[:, 1]/1000)
 y = (csv_data[:, 2]/1000)-.34
 z = csv_data[:, 3]/1000-.265
->>>>>>> 3a53789a378a5814cd6fa66d1076ff9bb582ec3c
 
 limit = 0
 if limit < 2:
@@ -123,11 +117,7 @@ for i in board_angles:
 
 start = time.perf_counter()
 #run brute force function and store list of intercepts, input vectors, and output vectors
-<<<<<<< HEAD
-dist_center, intercept_list, input_vect, output_vect, input_sphere, output_sphere = brute_force(x_coeff, y_coeff, z_coeff)
-=======
 dist_center, intercept_list, input_vect, output_vect, _, valid = brute_force(x_coeff, y_coeff, z_coeff, False)
->>>>>>> 3a53789a378a5814cd6fa66d1076ff9bb582ec3c
 fin = time.perf_counter()
 tot_time = (fin - start)
 print(f"time to optimize: {tot_time: 0.6f} seconds")
@@ -135,6 +125,7 @@ print(f"time to optimize: {tot_time: 0.6f} seconds")
 min_dist = np.nanmin(dist_center, initial=1, where=valid)
 if min_dist > 0:
     index = dist_center.index(min_dist)
+    print('Index:', index)
 else:
     index = 0
 #store intercept of closest impact
@@ -152,11 +143,11 @@ def rad2deg(list):
         new_list.append(i * (180/pi))
     return new_list
 
-print('backboard normal (degrees):', rad2deg(board_angles[index]))
-print('input angle (degrees):', rad2deg(input_sphere[index]))
-print('output angle (degrees):', rad2deg(output_sphere[index]))
-print('intercept (m):', intercept_list[index])
-print('distance to center at closest point (m): ', dist_center[index])
+#print('backboard normal (degrees):', rad2deg(board_angles[index]))
+#print('input angle (degrees):', rad2deg(input_sphere[index]))
+#print('output angle (degrees):', rad2deg(output_sphere[index]))
+#print('intercept (m):', intercept_list[index])
+#print('distance to center at closest point (m): ', dist_center[index])
 
 # Set the origin point of the vectors
 origin = [x_int, z_int, y_int]

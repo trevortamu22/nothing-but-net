@@ -43,7 +43,7 @@ def calculate_angle(pos):
 def main():
     # Set System Variables
     WHITE_BALANCE = 3500
-    MIN_POINTS = 5
+    MIN_POINTS = 6
     
     # Import motor calibration data
     motor1_cal = np.loadtxt('calibration_data/motor1_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
