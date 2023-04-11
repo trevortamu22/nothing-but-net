@@ -43,7 +43,7 @@ def end_velocities(x_coeff, y_coeff, z_coeff):
 def brute_force(x_coeff, y_coeff, z_coeff, validate):
     
     #establish hoop center
-    hoop_center = [[0], [-0.2032], [.2032]] # Lots of brackets force proper shape for repeat
+    hoop_center = [[0], [-0.27], [.14]] # Lots of brackets force proper shape for repeat
     vel = end_velocities(x_coeff, y_coeff, z_coeff)    
     coeff = np.array([[0, *x_coeff],[*y_coeff],[0, *z_coeff]])
     ang_coeffs = np.matmul(cart_ang,coeff) # all quadratic coeffs
@@ -66,7 +66,7 @@ def brute_force(x_coeff, y_coeff, z_coeff, validate):
         valid = dists < 0.05
         contact_time = -z_coeff[1]/z_coeff[0]
         position = np.matmul(coeff, [contact_time**2, contact_time, 1])
-        if(np.abs(position[0]) > 0.28 or np.abs(position[1]) > 0.19): valid = False
+        if(np.abs(position[0]) > 0.34 or np.abs(position[1]) > 0.25): valid = False
     else:
         valid = True
     return dists.tolist(), xyz_ints.T, velocities.T, output_vectors.T, sols, valid
@@ -77,4 +77,6 @@ def find_angles(x_coeff, y_coeff, z_coeff, validate):
     min_dist = np.nanmin(dist, initial=1, where=valid)
     if min_dist > 0:
         return board_angles[dist.index(min_dist)]
+    else:
+        print('No Valid Shot Found!')
     return None

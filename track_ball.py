@@ -21,15 +21,15 @@ def mask_to_circle(img, min_radius):
 def is_flying(pos):
     pos = np.array(pos)
     a = np.polyfit(pos[:,0], -pos[:,2], 2)[0]*10**9
-    if a < -4.35 and a > -5.45: print('Toss g =', round(-2*a, 2), 'm/s^2')
+    #if a < -4.35 and a > -5.45: print('Toss g =', round(-2*a, 2), 'm/s^2')
     return a < -4.35 and a > -5.45
 
 def calculate_angle(pos):
     t = pos[:, 0]/(10**6)
     t = t - t[0]
-    x = pos[:, 1]/1000
-    y = pos[:, 2]/1000
-    z = pos[:, 3]/1000
+    x = (pos[:, 1])/1000
+    y = (pos[:, 2]-340)/1000
+    z = (pos[:, 3]-265)/1000
     x_coeff = np.polyfit(t, x, 1)
     y_coeff = np.polyfit(t, -y, 2)
     z_coeff = np.polyfit(t, z, 1)
@@ -101,10 +101,11 @@ def main():
                 x, y, r = mask_to_circle(blur, 15)
                 if x > -1000 and x < 2048 and y < 1536 and capture.transformed_depth[y,x] > 0:
                     data_points.append((capture.color_timestamp_usec, *cal.convert_2d_to_3d((x,y), capture.transformed_depth[y,x], pyk4a.CalibrationType.COLOR)))
+                    #print(data_points[-1][1], -(data_points[-1][2]-340),data_points[-1][3]-265)
                     if(len(data_points) > MIN_POINTS):
                         if is_flying(data_points[-MIN_POINTS:]):
                             data_points = data_points[-MIN_POINTS:]
-                            solution = calculate_angle(data_points)
+                            solution = calculate_angle(np.array(data_points))
                             if solution is not None:
                                 steps = motor_steps(*solution, motor1_cal, motor2_cal, motor3_cal)
                                 motor_controller.move(serial_con, *steps)
