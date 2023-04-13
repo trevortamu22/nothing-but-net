@@ -28,9 +28,10 @@ ax.scatter(x, z, -y, color='m', label="selected arc")
 ax.set_xlabel("Left Right")
 ax.set_ylabel("Distance From Camera")
 ax.set_zlabel("Height")
-ax.axes.set_xlim3d(left=-2, right=2) 
-ax.axes.set_ylim3d(bottom=0, top=6) 
-ax.axes.set_zlim3d(bottom=-1.5, top=2) 
+ax.axes.set_xlim3d(left=-1.5, right=0.5) 
+ax.axes.set_ylim3d(bottom=0, top=3) 
+ax.axes.set_zlim3d(bottom=-1.5, top=1) 
+
 
 # Calculate line of fit and plot
 t_fit = np.linspace(min(t), max(t), 100)

@@ -38,7 +38,7 @@ for edge in edges:
 
 #########################  Plotting the Circle ################################
 # Define the circle center and radius
-center = (0, 0.185, -0.27) #hoop located level with bottom of backboard, 1 radius out
+center = (0, 0.175, -0.27) #hoop located level with bottom of backboard, 1 radius out
 radius = 0.1016 #meters (8in)
 
 # Define the number of points used to plot the circle
@@ -117,7 +117,7 @@ for i in board_angles:
 
 start = time.perf_counter()
 #run brute force function and store list of intercepts, input vectors, and output vectors
-dist_center, intercept_list, input_vect, output_vect, _, valid = brute_force(x_coeff, y_coeff, z_coeff, False)
+dist_center, intercept_list, input_vect, output_vect, _, valid = brute_force(x_coeff, y_coeff, z_coeff, True)
 fin = time.perf_counter()
 tot_time = (fin - start)
 print(f"time to optimize: {tot_time: 0.6f} seconds")

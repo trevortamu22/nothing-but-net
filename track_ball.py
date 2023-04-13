@@ -21,7 +21,7 @@ def mask_to_circle(img, min_radius):
 def is_flying(pos, thresh):
     pos = np.array(pos)
     a = np.polyfit(pos[:,0], -pos[:,2], 2)[0]*10**9
-    return = abs(4.9+a) < thresh
+    return abs(4.9+a) < thresh
 
 
 def calculate_angle(pos):
@@ -43,9 +43,9 @@ def calculate_angle(pos):
 def main():
     # Set System Variables
     WHITE_BALANCE = 3500
-    MIN_POINTS = 4
-    START_FLIGHT_TOL = 0.55
-    LOCK_FLIGHT_TOL = 0.4
+    MIN_POINTS = 5
+    START_FLIGHT_TOL = 2.5
+    LOCK_FLIGHT_TOL = 0.55
     
     # Import motor calibration data
     motor1_cal = np.loadtxt('calibration_data/motor1_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")
@@ -87,12 +87,12 @@ def main():
     
     data_points = []
     all_points = []
-    times = [0]
     t_final = 0
     
     # Main loop (runs until Ctrl+C is pressed)
     while 1:
         in_flight = False
+        times = [0]
         print('\nWaiting for toss!',end='\r')
         while 1:
             t1 = time.process_time_ns()
@@ -126,7 +126,7 @@ def main():
         motor_controller.returnhome(serial_con)
         print('Max time:', max(times), 'ms\tAverage Time:', sum(times)//len(times), 'ms\tTotal Time:', int((t_final-data_points[0][0])/1000), 'ms')
         np.savetxt('last_toss.csv', np.array(data_points), delimiter=",")
-    np.savetxt('full_last_run.csv', np.array(all_points), delimiter=",")
+        np.savetxt('full_last_run.csv', np.array(all_points), delimiter=",")
     k4a.stop()
     serial_con.close()
 

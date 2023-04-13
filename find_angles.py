@@ -43,7 +43,7 @@ def end_velocities(x_coeff, y_coeff, z_coeff):
 def brute_force(x_coeff, y_coeff, z_coeff, validate):
     
     #establish hoop center
-    hoop_center = [[0], [-0.27], [.185]] # Lots of brackets force proper shape for repeat
+    hoop_center = [[0], [-0.27], [.175]] # Lots of brackets force proper shape for repeat
     vel = end_velocities(x_coeff, y_coeff, z_coeff)    
     coeff = np.array([[0, *x_coeff],[*y_coeff],[0, *z_coeff]])
     ang_coeffs = np.matmul(cart_ang,coeff) # all quadratic coeffs
@@ -69,7 +69,10 @@ def brute_force(x_coeff, y_coeff, z_coeff, validate):
     
     if validate:
         # Validation Code contact time is being calculated a second time slowing stuff down
-        valid = dists < 0.05
+        valid_dist = dists < 0.05
+        valid_xy_int = np.logical_and(np.abs(xyz_ints[0,:]) < 0.4, np.abs(xyz_ints[1,:]) < 0.3)
+        valid_xyz_int = np.logical_and(valid_xy_int, np.abs(xyz_ints[2,:]) < 0.13)
+        valid = np.logical_and(valid_dist, valid_xyz_int)
         contact_time = -z_coeff[1]/z_coeff[0]
         position = np.matmul(coeff, [contact_time**2, contact_time, 1])
         if(np.abs(position[0]) > 0.34 or np.abs(position[1]) > 0.25): valid = False

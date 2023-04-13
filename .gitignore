@@ -3,4 +3,5 @@ run.bat
 draw.bat
 plot_toss.bat
 last_toss.csv
+simulate_var.bat
 full_last_run.csv
