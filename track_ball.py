@@ -45,7 +45,7 @@ def main():
     WHITE_BALANCE = 3500
     MIN_POINTS = 5
     START_FLIGHT_TOL = 2.5
-    LOCK_FLIGHT_TOL = 0.55
+    LOCK_FLIGHT_TOL = 0.75
     
     # Import motor calibration data
     motor1_cal = np.loadtxt('calibration_data/motor1_cal.csv', delimiter=",", unpack=True, encoding="utf-8-sig")

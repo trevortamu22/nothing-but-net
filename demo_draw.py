@@ -38,7 +38,7 @@ for edge in edges:
 
 #########################  Plotting the Circle ################################
 # Define the circle center and radius
-center = (0, 0.175, -0.27) #hoop located level with bottom of backboard, 1 radius out
+center = (0, 0.165, -0.27) #hoop located level with bottom of backboard, 1 radius out
 radius = 0.1016 #meters (8in)
 
 # Define the number of points used to plot the circle
@@ -55,9 +55,9 @@ ax.plot(x_circ, y_circ, z_circ, color='red')
 ax.axes.set_xlim3d(left=-1, right=1) 
 ax.axes.set_ylim3d(bottom=0, top=2) 
 ax.axes.set_zlim3d(bottom=-0.75, top=1)
-ax.set_xlabel("Left Right")
-ax.set_ylabel("Distance From Camera")
-ax.set_zlabel("Height")
+ax.set_xlabel("Horizontal Distance (m)")
+ax.set_ylabel("Distance From Camera (m)")
+ax.set_zlabel("Height (m)")
 
 
 #plot the scatter and line of best fit
@@ -173,9 +173,4 @@ for edge in edges:
     z_bb = [vertices[edge[0]][2], vertices[edge[1]][2]]
     ax.plot(x_bb, y_bb, z_bb, color='red')
 
-
-
-# Set the initial view of the plot
-ax.view_init(30, 750)
-#ax.view_init(azim=0, elev=90)
 plt.show()
