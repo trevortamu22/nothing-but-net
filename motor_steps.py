@@ -1,3 +1,6 @@
+''' Determines the correct motor steps for a given set of angles provided by find_angles.py
+    -Trevor Sides 05/03/23'''
+
 import numpy as np
 
 # Function that calculates the necessary motor steps to make the desired backboard position happen.
@@ -22,7 +25,7 @@ def motor_steps(theta_z, theta_x, motor1_array, motor2_array, motor3_array):
     theta_z_from_1 = theta_z_motor1
     theta_z_needed = theta_z - theta_z_from_1
     
-    # make an array with difference between Blaine's theta_z and my theta_z matrix. The minumum value's...
+    # make an array with difference between Blaine's (brute_force/find_angles.py) theta_z and my theta_z matrix. The minumum value's...
     # index in this array corresonds to the motor position we need in the solution matrix
     theta_z_difference_array = motor3_array[1] - theta_z_needed
     theta_z_difference_array = np.absolute(theta_z_difference_array)

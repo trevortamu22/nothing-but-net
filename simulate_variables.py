@@ -1,3 +1,8 @@
+''' This file runs the point selection code on a provided dataset of points collected by the camera.
+    This is useful for seeing if different parameters would have allowed a specific shot be be calculated better.
+    Most of the code is copied and pasted from elsewhere and this is not a critical program so it is not commented.
+    -Trevor Sides 05/03/23'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import Polynomial
@@ -25,9 +30,6 @@ def calculate_angle(pos):
     y_coeff = np.polyfit(t, -y, 2)
     z_coeff = np.polyfit(t, z, 1)
     
-    #theta_z = 6.35 * (np.pi/180)
-    #theta_x = -3.67 * (np.pi/180)
-    #return (theta_z, theta_x) # Temp output (radians)
     
     return find_angles(x_coeff,y_coeff,z_coeff, True)
 

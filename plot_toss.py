@@ -1,3 +1,8 @@
+''' Reads in two csv files (full_last_run.csv & last_toss.csv) and plots the full collection of data points in blue while plotting the selected points from the last shot in magenta.
+    This is useful for tweaking shot selection parameters. Helps the user visualize "did the system select all of the relavent points?"
+    Incorrect parameters in track_ball.py will lead to valid data being excluded from the trajectory regression.
+    -Trevor Sides 05/03/23'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import Polynomial

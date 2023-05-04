@@ -1,3 +1,7 @@
+''' Reads in a csv (last_toss.csv) and simulates the system response. The simulation is presented as a 3D matplotlib plot.
+    This simulation runs the backboard solution algorithm (find_angles.py) and must be given the proper parameters
+    -Trevor Sides 05/03/23'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import Polynomial
@@ -60,7 +64,7 @@ ax.set_ylabel("Distance From Camera (m)")
 ax.set_zlabel("Height (m)")
 
 
-#plot the scatter and line of best fit
+# import csv data and adujust coordinate system from camera coordinates to hoop coordinates
 csv_data = np.loadtxt('last_toss.csv', delimiter=',')
 
 t = csv_data[:, 0]/(10**6)
@@ -143,11 +147,6 @@ def rad2deg(list):
         new_list.append(i * (180/pi))
     return new_list
 
-#print('backboard normal (degrees):', rad2deg(board_angles[index]))
-#print('input angle (degrees):', rad2deg(input_sphere[index]))
-#print('output angle (degrees):', rad2deg(output_sphere[index]))
-#print('intercept (m):', intercept_list[index])
-#print('distance to center at closest point (m): ', dist_center[index])
 
 # Set the origin point of the vectors
 origin = [x_int, z_int, y_int]
